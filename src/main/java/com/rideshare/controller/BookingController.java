@@ -27,6 +27,7 @@ public class BookingController {
     private final RideRepository rideRepository;
     private final UserRepository userRepository;
     private final BookingService bookingService;
+    
 
 @PostMapping("/book/{rideId}")
 public Booking bookRide(@PathVariable Long rideId,
@@ -46,4 +47,5 @@ public Booking updateBooking(@PathVariable Long bookingId,
             principal.getName()
     );
 }
+
 }

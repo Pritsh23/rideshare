@@ -2,6 +2,7 @@ package com.rideshare.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -103,11 +104,14 @@ public List<RideResponseDTO> searchRides(String source,
                     .source(r.getSource())
                     .destination(r.getDestination())
                     .departureTime(r.getDepartureTime())
-                    .pricePerSeat(r.getPricePerSeat())
-                    .availableSeats(r.getAvailableSeats())
+                     .pricePerSeat(r.getPricePerSeat() != null ? r.getPricePerSeat() : 0.0)
+                .availableSeats(r.getAvailableSeats() != null ? r.getAvailableSeats() : 0)
                     .status(r.getStatus())
                     .build())
-            .toList();
+            .collect(Collectors.toList());
 }
+
+
+
 
 }
