@@ -97,19 +97,6 @@ export default function Register() {
           </div>
 
           <div className="mb-4">
-            <label className="block text-gray-700 font-semibold mb-2">I am a</label>
-            <select
-              name="role"
-              value={formData.role}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-            >
-              <option value="PASSENGER">Passenger</option>
-              <option value="DRIVER">Driver</option>
-            </select>
-          </div>
-
-          <div className="mb-4">
             <label className="block text-gray-700 font-semibold mb-2">Password</label>
             <input
               type="password"
