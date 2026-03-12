@@ -10,7 +10,27 @@ export default function Navigation() {
  const navigate = useNavigate();
 
 const handleCreateRide = async () => {
-  navigate("/driver-request");
+
+try {
+
+const res = await axios.get("http://localhost:8080/driver-status");
+
+if(res.data === true){
+
+navigate("/create-ride");
+
+}else{
+
+navigate("/driver-request");
+
+}
+
+} catch(err){
+
+console.error(err);
+
+}
+
 };
 
   return (
@@ -30,7 +50,7 @@ const handleCreateRide = async () => {
                 My Bookings
               </Link>
              <button onClick={handleCreateRide}>
-Create Ride
+           Create Ride
 </button>
               <div className="flex items-center gap-4">
                 <span className="text-gray-700">{user?.email}</span>
