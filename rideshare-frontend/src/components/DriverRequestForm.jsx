@@ -8,16 +8,29 @@ const DriverRequestForm = () => {
   const [vehicleNumber, setVehicleNumber] = useState("");
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    await axios.post("http://localhost:8080/driver-request",{
-licenseNumber,
-vehicleNumber
-});
+  if(!licenseNumber || !vehicleNumber){
+    alert("Please fill all fields");
+    return;
+  }
 
-alert("Request sent to admin for approval");
+  try {
 
-  };
+    await axios.post("http://localhost:8080/driver-request", {
+      licenseNumber,
+      vehicleNumber
+    });
+
+    alert("Request sent to admin for approval");
+
+  } catch (error) {
+
+    console.error(error);
+    alert("Error submitting request");
+
+  }
+};
 
   return (
     <div>
