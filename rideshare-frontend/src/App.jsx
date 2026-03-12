@@ -60,7 +60,14 @@ function App() {
               </ProtectedRoute>
             }
           />
-           <Route path="/create-ride" element={<DriverRequestForm />} />
+          <Route
+            path="/driver-request"
+            element={
+              <ProtectedRoute>
+                <DriverRequestForm />
+              </ProtectedRoute>
+            }
+          />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>

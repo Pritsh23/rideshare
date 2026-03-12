@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const DriverRequestForm = () => {
 
@@ -9,14 +10,13 @@ const DriverRequestForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const data = {
-      licenseNumber: licenseNumber,
-      vehicleNumber: vehicleNumber
-    };
+    await axios.post("http://localhost:8080/driver-request",{
+licenseNumber,
+vehicleNumber
+});
 
-    await axios.post("http://localhost:8080/driver-request", data);
+alert("Request sent to admin for approval");
 
-    alert("Request sent to admin for approval");
   };
 
   return (

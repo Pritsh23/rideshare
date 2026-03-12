@@ -1,9 +1,37 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+
 
 export default function Navigation() {
   const { user, isAuthenticated, logout } = useAuth();
+ const navigate = useNavigate();
+
+const handleCreateRide = async () => {
+
+try {
+
+const res = await axios.get("http://localhost:8080/driver-status");
+
+if(res.data === true){
+
+navigate("/create-ride");
+
+}else{
+
+navigate("/driver-request");
+
+}
+
+} catch(err){
+
+console.error(err);
+
+}
+
+};
 
   return (
     <nav className="bg-white shadow-md">
@@ -21,9 +49,9 @@ export default function Navigation() {
               <Link to="/my-bookings" className="text-gray-700 hover:text-blue-600 font-semibold">
                 My Bookings
               </Link>
-              <Link to="/create-ride" className="text-gray-700 hover:text-blue-600 font-semibold">
-                Create Ride
-              </Link>
+             <button onClick={handleCreateRide}>
+Create Ride
+</button>
               <div className="flex items-center gap-4">
                 <span className="text-gray-700">{user?.email}</span>
                 <button
