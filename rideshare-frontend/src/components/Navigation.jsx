@@ -10,27 +10,7 @@ export default function Navigation() {
  const navigate = useNavigate();
 
 const handleCreateRide = async () => {
-
-try {
-
-const res = await axios.get("http://localhost:8080/driver-status");
-
-if(res.data === true){
-
-navigate("/create-ride");
-
-}else{
-
-navigate("/driver-request");
-
-}
-
-} catch(err){
-
-console.error(err);
-
-}
-
+  navigate("/driver-request");
 };
 
   return (
