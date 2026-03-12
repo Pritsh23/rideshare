@@ -23,7 +23,7 @@ export default function Navigation() {
                   My Bookings
                 </Link>
               )}
-              {user?.role === 'DRIVER' && (
+              {user?.role === 'PASSENGER' && (
                 <Link to="/create-ride" className="text-gray-700 hover:text-blue-600 font-semibold">
                   Create Ride
                 </Link>
