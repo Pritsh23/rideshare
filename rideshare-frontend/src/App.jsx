@@ -11,6 +11,7 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import CreateRide from './pages/CreateRide';
 import MyBookings from './pages/MyBookings';
+import DriverRequestForm from "./components/DriverRequestForm";
 
 function App() {
   return (
@@ -59,6 +60,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+           <Route path="/create-ride" element={<DriverRequestForm />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>
