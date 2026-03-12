@@ -18,16 +18,12 @@ export default function Navigation() {
               <Link to="/dashboard" className="text-gray-700 hover:text-blue-600 font-semibold">
                 Dashboard
               </Link>
-              {user?.role === 'PASSENGER' && (
-                <Link to="/my-bookings" className="text-gray-700 hover:text-blue-600 font-semibold">
-                  My Bookings
-                </Link>
-              )}
-              {user?.role === 'DRIVER' && (
-                <Link to="/create-ride" className="text-gray-700 hover:text-blue-600 font-semibold">
-                  Create Ride
-                </Link>
-              )}
+              <Link to="/my-bookings" className="text-gray-700 hover:text-blue-600 font-semibold">
+                My Bookings
+              </Link>
+              <Link to="/create-ride" className="text-gray-700 hover:text-blue-600 font-semibold">
+                Create Ride
+              </Link>
               <div className="flex items-center gap-4">
                 <span className="text-gray-700">{user?.email}</span>
                 <button
