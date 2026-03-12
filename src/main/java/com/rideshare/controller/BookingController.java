@@ -19,7 +19,7 @@ import com.rideshare.service.BookingService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/passenger/bookings")
+@RequestMapping("/api/passenger/bookings")
 @RequiredArgsConstructor
 public class BookingController {
 

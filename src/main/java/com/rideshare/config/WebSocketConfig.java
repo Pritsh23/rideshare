@@ -20,7 +20,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws-location")
                 .setAllowedOriginPatterns("*")
-                // .withSockJS();
-                .setAllowedOriginPatterns("*");
+                .withSockJS();
+                // for testing in POSTMAN, you can comment out the withSockJS() and setAllowedOriginPatterns("*") lines and test with ws://localhost:8080/ws-location endpoint.
+                // .setAllowedOriginPatterns("*");
     }
 }

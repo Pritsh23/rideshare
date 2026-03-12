@@ -3,6 +3,7 @@ package com.rideshare.repository;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.hibernate.annotations.processing.Find;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -23,4 +24,8 @@ List<Ride> searchRides(String source,
                        LocalDateTime date,
                        Double maxPrice);
 
+// Finding a ride by driver and status
+    List<Ride> findByDriverIdAndStatus(Long driverId, String status);
+    List<Ride> findByPassengerIdAndStatus(Long passengerId, String status);
+    
 }

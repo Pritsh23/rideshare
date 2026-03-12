@@ -1,11 +1,14 @@
 package com.rideshare.entity;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,8 +31,23 @@ public class Payment {
     private Double amount;
 
     @Enumerated(EnumType.STRING)
-    private PaymentStatus status;
+    private PaymentMethod method; // COD, ONLINE
+
+    @Enumerated(EnumType.STRING)
+    private PaymentStatus status; // PENDING, SUCCESS, FAILED
+
+    private Double commission;
+
+    private Double driverAmount;
+
+    @ManyToOne
+    private User passenger;
+
+    @ManyToOne
+    private User driver;
 
     @OneToOne
-    private Booking booking;
+    private Ride ride;
+
+    private LocalDateTime createdAt = LocalDateTime.now();
 }
