@@ -13,7 +13,7 @@ import com.rideshare.service.DriverRequestService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/driver")
+@RequestMapping("/api/driver")
 @RequiredArgsConstructor
 public class DriverRequestController {
 

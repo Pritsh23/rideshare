@@ -45,4 +45,8 @@ public class Ride {
     @ManyToOne
     @JoinColumn(name = "driver_id")
     private User driver;
+
+ @ManyToOne
+@JoinColumn(name = "passenger_id")
+private User passenger;
 }

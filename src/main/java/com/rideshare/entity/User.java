@@ -40,4 +40,6 @@ public class User {
     private Double rating = 0.0;
 
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    private Double walletBalance = 0.0;
 }
