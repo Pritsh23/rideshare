@@ -1,145 +1,110 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { rideAPI } from '../services/api';
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 export default function CreateRide() {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [formData, setFormData] = useState({
-    source: '',
-    destination: '',
-    departureTime: '',
-    pricePerSeat: '',
-    totalSeats: '',
-  });
+  const [status, setStatus] = useState("loading"); // none/pending/approved
+  const [reqData, setReqData] = useState({ vehicleNumber: "", licenseNumber: "" });
+  const [form, setForm] = useState({ from: "", to: "", date: "", seats: 1, price: "" });
+  const [message, setMessage] = useState("");
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await axios.get("/api/driver/me");
+        if (!res.data) {
+          setStatus("none");
+        } else {
+          setStatus(res.data.status === "APPROVED" ? "approved" : "pending");
+        }
+      } catch (err) {
+        setStatus("none");
+      }
+    })();
+  }, []);
 
-  const handleSubmit = async (e) => {
+  const submitDriverRequest = async (e) => {
     e.preventDefault();
-    setError('');
-    setLoading(true);
-
+    setMessage("");
     try {
-      await rideAPI.createRide({
-        ...formData,
-        pricePerSeat: parseFloat(formData.pricePerSeat),
-        totalSeats: parseInt(formData.totalSeats),
-      });
-      navigate('/dashboard');
+      console.log("REQ DATA:", reqData);
+  await axios.post(
+  `/api/driver/apply?licenseNumber=${encodeURIComponent(reqData.licenseNumber)}&vehicleNumber=${encodeURIComponent(reqData.vehicleNumber)}`
+);
+      setStatus("pending");
+      setMessage("Applied; waiting admin approval.");
     } catch (err) {
-      setError('Failed to create ride. Please try again.');
-      console.error('Create ride error:', err);
+      const serverMsg =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        err?.message;
+      setMessage(`Could not submit request: ${serverMsg}`);
     }
-    setLoading(false);
   };
+
+  const submitRide = async (e) => {
+    e.preventDefault();
+    setMessage("");
+    try {
+      await axios.post("/api/rides", form);
+      navigate("/rides");
+    } catch (err) {
+      const serverMsg =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        err?.message;
+      setMessage(`Unable to create ride: ${serverMsg}`);
+    }
+  };
+
+  if (status === "loading") return <p>Checking driver status...</p>;
+
+  if (status !== "approved") {
+    return (
+      <div className="max-w-xl mx-auto p-4">
+        <h1 className="text-xl font-bold mb-4">Driver application</h1>
+        {status === "pending" && <p className="mb-4 text-orange-600">Status: pending</p>}
+        <form onSubmit={submitDriverRequest} className="space-y-3">
+          <input
+            name="vehicleNumber"
+            value={reqData.vehicleNumber}
+            onChange={(e) => setReqData({ ...reqData, vehicleNumber: e.target.value })}
+            placeholder="Vehicle number"
+            required
+            className="w-full p-2 border rounded"
+          />
+          <input
+            name="licenseNumber"
+            value={reqData.licenseNumber}
+            onChange={(e) => setReqData({ ...reqData, licenseNumber: e.target.value })}
+            placeholder="License number"
+            required
+            className="w-full p-2 border rounded"
+          />
+          <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">
+            {status === "pending" ? "Re-submit request" : "Submit request"}
+          </button>
+        </form>
+        {message && <p className="text-sm mt-3">{message}</p>}
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-8">
-        <h1 className="text-3xl font-bold mb-6 text-gray-800">Create a New Ride</h1>
-
-        <form onSubmit={handleSubmit}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div>
-              <label className="block text-gray-700 font-semibold mb-2">From</label>
-              <input
-                type="text"
-                name="source"
-                value={formData.source}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                placeholder="Departure location"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-gray-700 font-semibold mb-2">To</label>
-              <input
-                type="text"
-                name="destination"
-                value={formData.destination}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                placeholder="Destination"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-gray-700 font-semibold mb-2">Departure Date & Time</label>
-              <input
-                type="datetime-local"
-                name="departureTime"
-                value={formData.departureTime}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-gray-700 font-semibold mb-2">Price per Seat ($)</label>
-              <input
-                type="number"
-                name="pricePerSeat"
-                value={formData.pricePerSeat}
-                onChange={handleChange}
-                step="0.01"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                placeholder="0.00"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-gray-700 font-semibold mb-2">Total Seats</label>
-              <input
-                type="number"
-                name="totalSeats"
-                value={formData.totalSeats}
-                onChange={handleChange}
-                min="1"
-                max="8"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                placeholder="4"
-                required
-              />
-            </div>
-          </div>
-
-          {error && (
-            <div className="bg-red-100 text-red-700 px-4 py-3 rounded-lg mb-6">
-              {error}
-            </div>
-          )}
-
-          <div className="flex gap-4">
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex-1 bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
-            >
-              {loading ? 'Creating...' : 'Create Ride'}
-            </button>
-            <button
-              type="button"
-              onClick={() => navigate('/dashboard')}
-              className="flex-1 bg-gray-300 text-gray-800 font-semibold py-2 rounded-lg hover:bg-gray-400 transition"
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
-      </div>
+    <div className="max-w-xl mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">Create Ride</h1>
+      {message && <p className="text-red-600 mb-3">{message}</p>}
+      <form onSubmit={submitRide} className="space-y-3">
+        <input name="from" value={form.from} onChange={(e) => setForm({ ...form, from: e.target.value })} required placeholder="From" className="w-full p-2 border rounded" />
+        <input name="to" value={form.to} onChange={(e) => setForm({ ...form, to: e.target.value })} required placeholder="To" className="w-full p-2 border rounded" />
+        <input type="date" name="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} required className="w-full p-2 border rounded" />
+        <input type="number" name="seats" value={form.seats} min="1" onChange={(e) => setForm({ ...form, seats: Number(e.target.value) })} required className="w-full p-2 border rounded" />
+        <input type="number" name="price" value={form.price} min="0" onChange={(e) => setForm({ ...form, price: Number(e.target.value) })} required className="w-full p-2 border rounded" />
+        <button type="submit" className="w-full bg-green-600 text-white p-2 rounded">
+          Create Ride
+        </button>
+      </form>
     </div>
   );
 }
