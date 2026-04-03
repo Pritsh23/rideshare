@@ -2,6 +2,24 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
+const API_BASE_URL = 'http://localhost:8080/api';
+
+const apiClient = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Add token to requests
+apiClient.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 export default function CreateRide() {
   const navigate = useNavigate();
   const [status, setStatus] = useState("loading"); // none/pending/approved
@@ -12,7 +30,7 @@ export default function CreateRide() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await axios.get("/api/driver/me");
+        const res = await apiClient.get("/driver/me");
         if (!res.data) {
           setStatus("none");
         } else {
@@ -29,8 +47,8 @@ export default function CreateRide() {
     setMessage("");
     try {
       console.log("REQ DATA:", reqData);
-  await axios.post(
-  `/api/driver/apply?licenseNumber=${encodeURIComponent(reqData.licenseNumber)}&vehicleNumber=${encodeURIComponent(reqData.vehicleNumber)}`
+  await apiClient.post(
+  `/driver/apply?licenseNumber=${encodeURIComponent(reqData.licenseNumber)}&vehicleNumber=${encodeURIComponent(reqData.vehicleNumber)}`
 );
       setStatus("pending");
       setMessage("Applied; waiting admin approval.");
@@ -47,7 +65,7 @@ export default function CreateRide() {
     e.preventDefault();
     setMessage("");
     try {
-      await axios.post("/api/rides", form);
+      await apiClient.post("/rides", form);
       navigate("/rides");
     } catch (err) {
       const serverMsg =

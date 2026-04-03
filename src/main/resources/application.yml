@@ -1,8 +1,8 @@
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/rideshare_db
-    username: postgres
-    password: admin@123
+    username: apple
+    password: 1234
 
   jpa:
     hibernate:
