@@ -60,11 +60,6 @@ public class DriverRequestService {
         return driverRequestRepository.save(request);
     }
 
-    public DriverRequest getDriverRequestStatus(String email) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        return driverRequestRepository.findByUserId(user.getId())
-                .orElse(null);
-    }
+
 }
