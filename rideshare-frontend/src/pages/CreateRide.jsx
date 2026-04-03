@@ -24,7 +24,7 @@ export default function CreateRide() {
   const navigate = useNavigate();
   const [status, setStatus] = useState("loading"); // none/pending/approved
   const [reqData, setReqData] = useState({ vehicleNumber: "", licenseNumber: "" });
-  const [form, setForm] = useState({ from: "", to: "", date: "", seats: 1, price: "" });
+  const [form, setForm] = useState({ from: "", to: "", date: "", time: "", seats: 1, price: "" });
   const [message, setMessage] = useState("");
 
   useEffect(() => {
@@ -65,7 +65,22 @@ export default function CreateRide() {
     e.preventDefault();
     setMessage("");
     try {
-      await apiClient.post("/rides", form);
+      // Combine date and time into departureTime
+      const departureDateTime = new Date(`${form.date}T${form.time}`);
+      
+      // Calculate availabilityEndTime (2 hours after departure)
+      const availabilityEndTime = new Date(departureDateTime.getTime() + 2 * 60 * 60 * 1000);
+      
+      const rideData = {
+        source: form.from,
+        destination: form.to,
+        departureTime: departureDateTime.toISOString(),
+        availabilityEndTime: availabilityEndTime.toISOString(),
+        totalSeats: form.seats,
+        pricePerSeat: form.price
+      };
+      
+      await apiClient.post("/rides/create", rideData);
       navigate("/rides");
     } catch (err) {
       const serverMsg =
@@ -117,7 +132,10 @@ export default function CreateRide() {
         <input name="from" value={form.from} onChange={(e) => setForm({ ...form, from: e.target.value })} required placeholder="From" className="w-full p-2 border rounded" />
         <input name="to" value={form.to} onChange={(e) => setForm({ ...form, to: e.target.value })} required placeholder="To" className="w-full p-2 border rounded" />
         <input type="date" name="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} required className="w-full p-2 border rounded" />
+        <input type="time" name="time" value={form.time} onChange={(e) => setForm({ ...form, time: e.target.value })} required className="w-full p-2 border rounded" />
+        <label htmlFor=""><b>Available seat</b></label>
         <input type="number" name="seats" value={form.seats} min="1" onChange={(e) => setForm({ ...form, seats: Number(e.target.value) })} required className="w-full p-2 border rounded" />
+          <label htmlFor=""><b>Price per seat</b></label>
         <input type="number" name="price" value={form.price} min="0" onChange={(e) => setForm({ ...form, price: Number(e.target.value) })} required className="w-full p-2 border rounded" />
         <button type="submit" className="w-full bg-green-600 text-white p-2 rounded">
           Create Ride

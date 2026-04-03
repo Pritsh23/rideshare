@@ -12,12 +12,36 @@ export default function Dashboard() {
     date: '',
   });
 
+  // Auto-refresh rides every 30 seconds to remove expired ones
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (rides.length > 0) {
+        const now = new Date();
+        const validRides = rides.filter(ride => {
+          const availabilityEndTime = new Date(ride.availabilityEndTime);
+          return availabilityEndTime > now;
+        });
+        if (validRides.length !== rides.length) {
+          setRides(validRides);
+        }
+      }
+    }, 30000);
+    
+    return () => clearInterval(interval);
+  }, [rides]);
+
   const handleSearch = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
       const response = await rideAPI.searchRides(searchFilters);
-      setRides(response.data);
+      // Filter out expired rides
+      const now = new Date();
+      const validRides = response.data.filter(ride => {
+        const availabilityEndTime = new Date(ride.availabilityEndTime);
+        return availabilityEndTime > now;
+      });
+      setRides(validRides);
     } catch (error) {
       console.error('Search error:', error);
     }
@@ -107,7 +131,8 @@ export default function Dashboard() {
                 <div className="flex items-start justify-between mb-4">
                   <div>
                     <h3 className="text-lg font-bold text-gray-800">{ride.source} → {ride.destination}</h3>
-                    <p className="text-sm text-gray-600">{ride.departureTime}</p>
+                    <p className="text-sm text-gray-600">Departure: {new Date(ride.departureTime).toLocaleString()}</p>
+                    <p className="text-xs text-orange-600 font-semibold">Available until: {new Date(ride.availabilityEndTime).toLocaleString()}</p>
                   </div>
                   <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
                     {ride.availableSeats} seats
