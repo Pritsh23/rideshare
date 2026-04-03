@@ -2,6 +2,7 @@ package com.rideshare.controller;
 
 import java.security.Principal;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -30,5 +31,12 @@ public class DriverRequestController {
                 licenseNumber,
                 vehicleNumber
         );
+
     }
+    // Driver views their application status
+    @GetMapping("/application-status")
+    public DriverRequest getApplicationStatus(Principal principal) {
+        return service.getDriverRequestStatus(principal.getName());
+    }
+    
 }
