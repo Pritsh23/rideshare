@@ -27,20 +27,26 @@ export default function CreateRide() {
   const [form, setForm] = useState({ from: "", to: "", date: "", time: "", seats: 1, price: "" });
   const [message, setMessage] = useState("");
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const res = await apiClient.get("/driver/me");
-        if (!res.data) {
-          setStatus("none");
-        } else {
-          setStatus(res.data.status === "APPROVED" ? "approved" : "pending");
-        }
-      } catch (err) {
+useEffect(() => {
+  (async () => {
+    try {
+      const res = await apiClient.get("/driver/me");
+      if (!res.data) {
+        setStatus("none");
+      } else {
+        setStatus(res.data.status === "APPROVED" ? "approved" : "pending");
+      }
+    } catch (err) {
+      console.log("ERROR:", err.response);
+
+      if (err.response?.status === 401) {
+        setStatus("none"); // not logged in
+      } else {
         setStatus("none");
       }
-    })();
-  }, []);
+    }
+  })();
+}, []);
 
   const submitDriverRequest = async (e) => {
     e.preventDefault();
