@@ -49,7 +49,7 @@ public ResponseEntity<?> getDriver(Principal principal) {
 
     String email = principal.getName();
 
-    DriverRequest driver = driverRequestRepository.findByEmail(email)
+    DriverRequest driver = driverRequestRepository .findByUserEmail(email)
             .orElse(null);
 
     return ResponseEntity.ok(driver);

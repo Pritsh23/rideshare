@@ -16,5 +16,6 @@ public interface DriverRequestRepository
     List<DriverRequest> findByStatus(RequestStatus status);
 
     Optional<DriverRequest> findByUserId(Long userId);
-
+    
+ Optional<DriverRequest> findByUserEmail(String email);
         }

@@ -10,5 +10,7 @@ import com.rideshare.entity.BookingStatus;
 public interface BookingRepository extends  JpaRepository<Booking, Long>{
 
     List<Booking> findByRideIdAndStatus(Long rideId, BookingStatus accepted);
-
+  List<Booking> findByRideDriverEmail(String email);
+      List<Booking> findByPassengerEmail(String email);
+boolean existsByRideIdAndPassengerEmail(Long rideId, String email);
 }

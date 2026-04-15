@@ -19,27 +19,37 @@ public class DriverRequestService {
     private final UserRepository userRepository;
 
     // Passenger applies
-    public DriverRequest applyForDriver(String email,
-                                        String licenseNumber,
-                                        String vehicleNumber) {
+ public DriverRequest applyForDriver(String email,
+                                    String licenseNumber,
+                                    String vehicleNumber) {
 
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    User user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (user.getRole() == Role.DRIVER) {
-            throw new RuntimeException("Already a driver");
-        }
-
-        DriverRequest request = DriverRequest.builder()
-                .licenseNumber(licenseNumber)
-                .vehicleNumber(vehicleNumber)
-                .status(RequestStatus.PENDING)
-                .user(user)
-                .build();
-
-        return driverRequestRepository.save(request);
+    if (user.getRole() == Role.DRIVER) {
+        throw new RuntimeException("Already a driver");
     }
 
+    DriverRequest existing = driverRequestRepository
+            .findByUserEmail(email)
+            .orElse(null);
+
+    if (existing != null) {
+        existing.setLicenseNumber(licenseNumber);
+        existing.setVehicleNumber(vehicleNumber);
+        existing.setStatus(RequestStatus.PENDING);
+        return driverRequestRepository.save(existing);
+    }
+
+    DriverRequest request = DriverRequest.builder()
+            .licenseNumber(licenseNumber)
+            .vehicleNumber(vehicleNumber)
+            .status(RequestStatus.PENDING)
+            .user(user)
+            .build();
+
+    return driverRequestRepository.save(request);
+}
     // Admin approves or rejects
     public DriverRequest updateStatus(Long requestId,
                                       RequestStatus status) {

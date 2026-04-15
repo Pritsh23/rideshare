@@ -25,6 +25,8 @@ public class DriverRequest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    
+
     private String licenseNumber;
     private String vehicleNumber;
 

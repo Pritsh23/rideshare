@@ -2,6 +2,8 @@ package com.rideshare.entity;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -32,12 +34,18 @@ public class Ride {
     private String source;
     private String destination;
 
-    private LocalDateTime departureTime;
+  
+@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
+private LocalDateTime departureTime;
+
+@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
+private LocalDateTime availabilityEndTime;
 
     private Double pricePerSeat;
 
     private Integer totalSeats;
     private Integer availableSeats;
+    private Integer bookedSeats=0;
 
     @Enumerated(EnumType.STRING)
     private RideStatus status; // CREATED, STARTED, COMPLETED, CANCELLED
@@ -45,6 +53,8 @@ public class Ride {
     @ManyToOne
     @JoinColumn(name = "driver_id")
     private User driver;
+
+
 
  @ManyToOne
 @JoinColumn(name = "passenger_id")

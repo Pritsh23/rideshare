@@ -26,5 +26,6 @@ List<Ride> searchRides(String source,
 // Finding a ride by driver and status
     List<Ride> findByDriverIdAndStatus(Long driverId, String status);
     List<Ride> findByPassengerIdAndStatus(Long passengerId, String status);
-    
+
+    // List<Ride> findByDriverEmail(String email);
 }
