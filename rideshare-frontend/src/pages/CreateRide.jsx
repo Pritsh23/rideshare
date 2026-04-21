@@ -42,27 +42,28 @@ export default function CreateRide() {
 
   // 🔄 Check driver status
   useEffect(() => {
-    const checkStatus = async () => {
-      try {
-        const res = await apiClient.get("/driver/me");
-
-        if (!res.data) {
-          setStatus("none");
-        } else {
-          setStatus(
-            res.data.status === "APPROVED" ? "approved" : "pending"
-          );
-        }
-      } catch (err) {
+  const checkStatus = async () => {
+    try {
+      const res = await apiClient.get("/driver/me");
+      if (!res.data) {
+        setStatus("none");
+      } else {
+        // Ensure status is compared against 'APPROVED' in uppercase to match backend
+        setStatus(res.data.status === "APPROVED" ? "approved" : "pending");
+      }
+    } catch (err) {
+      // Only reset status if the error is 401 (Unauthorized) or 404 (Not Found)
+      if (err.response?.status === 401 || err.response?.status === 404) {
         setStatus("none");
       }
-    };
+      console.error("Status check failed:", err.message);
+    }
+  };
 
-    checkStatus();
-
-    const interval = setInterval(checkStatus, 5000);
-    return () => clearInterval(interval);
-  }, []);
+  checkStatus();
+  const interval = setInterval(checkStatus, 10000); // Increased to 10s to reduce server load
+  return () => clearInterval(interval);
+}, []);
 
   // 🚗 Apply for driver
   const submitDriverRequest = async (e) => {
@@ -117,7 +118,7 @@ export default function CreateRide() {
       setMessage("Ride created successfully 🚗");
 
       setTimeout(() => {
-        navigate("/rides");
+        navigate("/view-rides");
       }, 1500);
     } catch (err) {
       console.log("FULL ERROR:", err.response);
@@ -231,7 +232,7 @@ export default function CreateRide() {
           className="w-full p-2 border rounded"
           required
         />
-
+<label htmlFor="availableSeats"><b>Available Seats</b></label>
         <input
           type="number"
           min="1"
@@ -242,7 +243,7 @@ export default function CreateRide() {
           className="w-full p-2 border rounded"
           required
         />
-
+<label htmlFor="price"><b>Price per seat</b></label>
         <input
           type="number"
           min="0"

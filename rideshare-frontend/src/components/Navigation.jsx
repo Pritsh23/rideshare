@@ -4,19 +4,29 @@ import { useAuth } from '../context/AuthContext';
 
 export default function Navigation() {
   const { isAuthenticated, logout } = useAuth();
+  const userName = localStorage.getItem("userName"); 
 
   return (
     <nav className="bg-white shadow-md">
       <div className="px-4 py-3 flex justify-between items-center">
         <Link to="/" className="text-2xl font-bold text-blue-600">🚗 Rideshare</Link>
+        
         {isAuthenticated ? (
-          <div className="flex items-center gap-3">
-            <Link to="/dashboard" className="hover:text-blue-600">Dashboard</Link>
-            <Link to="/my-bookings" className="hover:text-blue-600">My Bookings</Link>
+          <div className="flex items-center gap-4">
+            {/* Options available to ALL users */}
+            
+            <Link to="/dashboard" className="hover:text-blue-600 font-medium">Dashboard</Link>
+            <Link to="/view-rides" className="hover:text-blue-600 font-medium">View Rides</Link>
+            
             <Link to="/create-ride" className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">
-              Create Ride
+              Offer a Ride
             </Link>
-            <button onClick={logout} className="bg-red-600 text-white px-3 py-1 rounded">Logout</button>
+
+          
+
+            <button onClick={logout} className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition">
+              Logout
+            </button>
           </div>
         ) : (
           <div className="flex gap-2">

@@ -4,6 +4,7 @@
 # Config (secrets)
 application.properties
 application.yml
+pom.xml
 
 # IDE
 .idea/

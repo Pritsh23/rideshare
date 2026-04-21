@@ -12,6 +12,7 @@ import Dashboard from './pages/Dashboard';
 import CreateRide from './pages/CreateRide';
 import MyBookings from './pages/MyBookings';
 import DriverRequestForm from "./components/DriverRequestForm";
+import RideList from "./pages/RideList";
 
 function App() {
   return (
@@ -44,6 +45,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+          
           <Route
             path="/create-ride"
             element={
@@ -68,6 +70,11 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/view-rides" element={ <ProtectedRoute>
+      <RideList/>
+    </ProtectedRoute>
+  }
+/>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>

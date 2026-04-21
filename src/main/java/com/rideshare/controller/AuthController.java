@@ -1,7 +1,9 @@
 package com.rideshare.controller;
 
+import java.security.Principal;
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -52,4 +54,23 @@ public List<User> getAllUsers() {
     return userRepository.findAll();
 }
 
+@GetMapping("/me")
+public ResponseEntity<?> getCurrentUser(java.security.Principal principal) {
+    // 1. Check if the principal (session) exists
+    if (principal == null) {
+        return ResponseEntity.status(401).body("No session found");
+    }
+
+    // 2. Fetch user from database
+    java.util.Optional<User> userOptional = userRepository.findByEmail(principal.getName());
+
+    // 3. Handle the result manually to avoid stream/Optional errors
+    if (userOptional.isPresent()) {
+        User user = userOptional.get();
+        user.setPassword(null); // Security: hide password
+        return ResponseEntity.ok(user);
+    } else {
+        return ResponseEntity.status(404).body("User not found");
+    }
+}
 }

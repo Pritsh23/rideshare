@@ -27,22 +27,31 @@ export default function RideList() {
 
   // 🚀 Search rides
   const searchRides = async () => {
-    setLoading(true);
+  setLoading(true);
+  try {
+    // Get the current time in the format the backend expects
+    const currentDateTime = new Date().toISOString().split('.')[0]; 
 
-    try {
-      const res = await apiClient.get(
-        `/rides/search?source=${search.source}&destination=${search.destination}&date=2025-01-01T00:00:00&maxPrice=10000`
-      );
+    const res = await apiClient.get(
+      `/rides/search`, {
+        params: {
+          source: search.source,
+          destination: search.destination,
+          date: currentDateTime, // Use current time instead of 2025
+          maxPrice: 10000
+        }
+      }
+    );
 
-      console.log("SEARCH RESULT:", res.data);
-      setRides(res.data || []);
-    } catch (err) {
-      console.error("Error searching rides:", err);
-      alert("Error fetching rides");
-    } finally {
-      setLoading(false);
-    }
-  };
+    console.log("SEARCH RESULT:", res.data);
+    setRides(res.data || []);
+  } catch (err) {
+    console.error("Error searching rides:", err);
+    alert("Error fetching rides");
+  } finally {
+    setLoading(false);
+  }
+};
 
   // 🚀 Book ride
   const bookRide = async (rideId) => {
