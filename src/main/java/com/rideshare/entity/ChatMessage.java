@@ -34,4 +34,7 @@ public class ChatMessage {
 
     @ManyToOne
     private User sender;
+
+    @ManyToOne
+    private User receiver;
 }
