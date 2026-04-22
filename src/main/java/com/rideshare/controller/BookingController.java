@@ -1,7 +1,9 @@
 package com.rideshare.controller;
 
 import java.security.Principal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,7 +28,8 @@ public class BookingController {
     private final BookingRepository bookingRepository;
     private final RideRepository rideRepository;
     private final UserRepository userRepository;
-    private final PaymentRepository paymentRepository; // Injected for cancel logic
+    private final PaymentRepository paymentRepository;
+     // Injected for cancel logic
 
     @PostMapping("/create/{rideId}")
     public Booking createBooking(@PathVariable Long rideId,
@@ -130,4 +133,30 @@ public class BookingController {
 
         return "Booking and payment records removed successfully";
     }
+
+@GetMapping("/contact/{bookingId}")
+public ResponseEntity<Map<String, String>> getContact(
+        Principal principal,
+        @PathVariable Long bookingId) {
+
+    Booking booking = bookingRepository.findById(bookingId)
+            .orElseThrow(() -> new RuntimeException("Booking not found"));
+
+    if (booking.getStatus() != BookingStatus.ACCEPTED) {
+        throw new RuntimeException("Contact not available");
+    }
+
+    User user = userRepository.findByEmail(principal.getName())
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
+    Map<String, String> response = new HashMap<>();
+
+    if (user.getId().equals(booking.getPassenger().getId())) {
+        response.put("phone", booking.getRide().getDriver().getPhone());
+    } else {
+        response.put("phone", booking.getPassenger().getPhone());
+    }
+
+    return ResponseEntity.ok(response);
+}
 }
