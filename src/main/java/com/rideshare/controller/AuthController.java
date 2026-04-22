@@ -1,6 +1,5 @@
 package com.rideshare.controller;
 
-import java.security.Principal;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;

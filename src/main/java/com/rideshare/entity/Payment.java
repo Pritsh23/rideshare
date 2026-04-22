@@ -8,6 +8,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
@@ -49,5 +50,8 @@ public class Payment {
     @OneToOne
     private Ride ride;
 
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private final LocalDateTime createdAt = LocalDateTime.now();
+    @ManyToOne // or @OneToOne
+@JoinColumn(name = "booking_id")
+private Booking booking; // This allows 'bookingId' to be recognized
 }

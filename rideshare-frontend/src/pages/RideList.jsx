@@ -18,121 +18,165 @@ apiClient.interceptors.request.use((config) => {
 export default function RideList() {
   const [rides, setRides] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState("CASH");
+  const [bookingStatuses, setBookingStatuses] = useState({});
 
-  // 🔍 search inputs
   const [search, setSearch] = useState({
     source: "",
     destination: ""
   });
 
-  // 🚀 Search rides
-  const searchRides = async () => {
-  setLoading(true);
-  try {
-    // Get the current time in the format the backend expects
-    const currentDateTime = new Date().toISOString().split('.')[0]; 
+  useEffect(() => {
+    searchRides();
+  }, []);
 
-    const res = await apiClient.get(
-      `/rides/search`, {
+  const searchRides = async () => {
+    setLoading(true);
+    try {
+      const currentDateTime = new Date().toISOString().split('.')[0];
+      const res = await apiClient.get(`/rides/search`, {
         params: {
           source: search.source,
           destination: search.destination,
-          date: currentDateTime, // Use current time instead of 2025
+          date: currentDateTime,
           maxPrice: 10000
         }
-      }
-    );
-
-    console.log("SEARCH RESULT:", res.data);
-    setRides(res.data || []);
-  } catch (err) {
-    console.error("Error searching rides:", err);
-    alert("Error fetching rides");
-  } finally {
-    setLoading(false);
-  }
-};
-
-  // 🚀 Book ride
-  const bookRide = async (rideId) => {
-    try {
-      await apiClient.post(`/bookings/create/${rideId}?seats=1`);
-      alert("Ride booked successfully!");
-      searchRides(); // refresh
+      });
+      setRides(res.data || []);
     } catch (err) {
-      console.error(err);
-      alert(err?.response?.data?.message || "Booking failed");
+      console.error("Error searching rides:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
+  const bookRide = async (rideId) => {
+    if (!paymentMethod) {
+      alert("Please select COD or ONLINE payment method!");
+      return;
+    }
+
+    try {
+      await apiClient.post(`/bookings/create/${rideId}`, {}, {
+        params: { seats: 1, paymentMethod: paymentMethod }
+      });
+
+      try {
+        await apiClient.post(`/payments/complete/${rideId}`, null, {
+          params: { method: paymentMethod }
+        });
+        alert("Booking and Payment Successful! 🎉");
+      } catch (payErr) {
+        alert("Ride booked (Unpaid). Payment API Error.");
+      }
+      searchRides();
+    } catch (err) {
+      alert("Booking failed: " + (err.response?.data?.message || "Check parameters"));
+    }
+  };
+
+  // Helper to format the Date
+  const formatDateTime = (dateStr) => {
+    if (!dateStr) return "TBD";
+    return new Date(dateStr).toLocaleString('en-IN', {
+      day: '2-digit',
+      month: 'short',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+  };
+
   return (
-    <div className="p-4">
+    <div className="max-w-4xl mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">Find a Ride</h1>
 
-      {/* 🔍 SEARCH UI */}
-      <h1 className="text-2xl font-bold mb-4">Search Ride</h1>
-
-      <div className="flex gap-2 mb-4">
+      {/* SEARCH UI */}
+      <div className="bg-gray-100 p-4 rounded-lg flex flex-wrap gap-3 mb-6">
         <input
           placeholder="From"
           value={search.source}
-          onChange={(e) =>
-            setSearch({ ...search, source: e.target.value })
-          }
-          className="p-2 border rounded w-full"
+          onChange={(e) => setSearch({ ...search, source: e.target.value })}
+          className="p-2 border rounded flex-1 min-w-[200px]"
         />
-
         <input
           placeholder="To"
           value={search.destination}
-          onChange={(e) =>
-            setSearch({ ...search, destination: e.target.value })
-          }
-          className="p-2 border rounded w-full"
+          onChange={(e) => setSearch({ ...search, destination: e.target.value })}
+          className="p-2 border rounded flex-1 min-w-[200px]"
         />
-
-        <button
-          onClick={searchRides}
-          className="bg-blue-600 text-white px-4 rounded"
-        >
-          Search
-        </button>
+        <button onClick={searchRides} className="bg-blue-600 text-white px-6 py-2 rounded">Search</button>
       </div>
 
-      {/* 🚗 RESULTS */}
-      {loading ? (
-        <p>Loading...</p>
-      ) : rides.length === 0 ? (
-        <p>No rides found.</p>
-      ) : (
-        rides.map((ride) => (
-          <div key={ride.id} className="border p-3 mb-3 rounded">
+      {/* PAYMENT SELECTOR */}
+      <div className="mb-6 p-3 border-l-4 border-blue-500 bg-blue-50 flex items-center justify-between">
+        <div>
+          <label className="font-bold mr-2">Payment Method:</label>
+          <select 
+            value={paymentMethod} 
+            onChange={(e) => setPaymentMethod(e.target.value)}
+            className="p-1 border rounded"
+          >
+            <option value="">select</option>
+            <option value="ONLINE">UPI</option>
+            <option value="COD">CASH</option>
+          </select>
+        </div>
+        <span className="text-xs font-bold bg-blue-200 px-2 py-1 rounded text-blue-800">
+          Mode: {paymentMethod}
+        </span>
+      </div>
 
-            <p><strong>{ride.source} → {ride.destination}</strong></p>
+      {/* RESULTS */}
+      <h2 className="text-xl font-semibold mb-3">Available Rides</h2>
+      {loading ? <p>Loading...</p> : (
+        <div className="grid gap-4">
+          {rides.map((ride) => (
+            <div key={ride.id} className="border p-4 rounded-xl shadow-sm bg-white hover:border-blue-300 transition">
+              <div className="flex justify-between items-start border-b pb-3 mb-3">
+                <div>
+                  <p className="text-lg font-bold text-gray-800">{ride.source} → {ride.destination}</p>
+                  {/* 📅 DEPARTURE TIME */}
+                  <p className="text-sm font-medium text-blue-600">
+                    🕒 {formatDateTime(ride.departureTime)}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xl font-bold text-green-600">₹{ride.pricePerSeat}</p>
+                  <p className="text-xs text-gray-500">Available Seats: {ride.availableSeats}/{ride.totalSeats}</p>
+                </div>
+              </div>
 
-            <p>
-              Departure:{" "}
-              {new Date(ride.departureTime).toLocaleString()}
-            </p>
+             {/* 👤 RIDER/DRIVER INFORMATION */}
+<div className="flex justify-between items-center">
+  <div className="space-y-1">
+    <div className="flex items-center gap-2">
+      {/* Updated line below: uses ride.driver.name */}
+      <span className="text-sm font-semibold text-gray-700">
+        Driver: {ride.driver?.name || "Unknown Driver"}
+      </span>
+      <span className="text-[10px] bg-green-100 text-green-700 px-1 rounded">
+        ⭐ {ride.driver?.rating || "5.0"}
+      </span>
+    </div>
+    
+    {/* Updated line below: uses ride.driver.phone */}
+    <p className="text-xs text-gray-500">
+      📞 {ride.driver?.phone || "No Contact Shared"}
+    </p>
+  </div>
 
-            <p>Available Seats: {ride.availableSeats}</p>
-
-            <p>Price: ₹{ride.pricePerSeat}</p>
-
-            {/* 🔥 BOOK BUTTON */}
-            <button
-              onClick={() => bookRide(ride.id)}
-              disabled={ride.availableSeats === 0}
-              className={`mt-2 px-3 py-1 rounded text-white ${
-                ride.availableSeats === 0
-                  ? "bg-gray-400"
-                  : "bg-green-600"
-              }`}
-            >
-              {ride.availableSeats === 0 ? "Full" : "Book Ride"}
-            </button>
-
-          </div>
-        ))
+  <button
+    onClick={() => bookRide(ride.id)}
+    // ... remaining button code ...
+  >
+    {bookingStatuses[ride.id] ? "Booked" : ride.availableSeats === 0 ? "Full" : "Book & Pay"}
+  </button>
+</div>
+            </div>
+          ))}
+          {rides.length === 0 && <p className="text-center text-gray-500">No rides found for this route.</p>}
+        </div>
       )}
     </div>
   );
