@@ -23,9 +23,11 @@ List<Ride> searchRides(String source,
                        LocalDateTime date,
                        Double maxPrice);
 
-// Finding a ride by driver and status
+// Find everything by driver ID
+    List<Ride> findByDriverId(Long driverId);
+    
+    // Your existing method for available searches
     List<Ride> findByDriverIdAndStatus(Long driverId, String status);
-    List<Ride> findByPassengerIdAndStatus(Long passengerId, String status);
-
-    // List<Ride> findByDriverEmail(String email);
+    // Spring Data JPA generates the SQL "DELETE FROM ride WHERE departure_time < ?"
+    void deleteByDepartureTimeBefore(LocalDateTime dateTime);
 }

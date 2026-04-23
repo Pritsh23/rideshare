@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.rideshare.dto.RideRequestDTO;
@@ -19,7 +20,6 @@ import com.rideshare.repository.UserRepository;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
 
 @Service
 @RequiredArgsConstructor
@@ -104,9 +104,12 @@ public List<RideResponseDTO> searchRides(String source,
                     .source(r.getSource())
                     .destination(r.getDestination())
                     .departureTime(r.getDepartureTime())
-                     .pricePerSeat(r.getPricePerSeat() != null ? r.getPricePerSeat() : 0.0)
-                .availableSeats(r.getAvailableSeats() != null ? r.getAvailableSeats() : 0)
+                    .pricePerSeat(r.getPricePerSeat() != null ? r.getPricePerSeat() : 0.0)
+                    .availableSeats(r.getAvailableSeats() != null ? r.getAvailableSeats() : 0)
                     .status(r.getStatus())
+                    // --- MAP DRIVER DETAILS HERE ---
+                    .driverName(r.getDriver() != null ? r.getDriver().getName() : "Unknown Driver")
+                    .driverPhone(r.getDriver() != null ? r.getDriver().getPhone() : "No Contact Shared")
                     .build())
             .collect(Collectors.toList());
 }

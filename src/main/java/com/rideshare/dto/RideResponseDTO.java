@@ -23,6 +23,11 @@ public class RideResponseDTO {
     private LocalDateTime departureTime;
     private Double pricePerSeat;
     private Integer availableSeats;
+    private Integer totalSeats; // Added to match your UI's "0/4" display
     private RideStatus status;
-}
 
+    // --- ADD THESE FIELDS ---
+    private String driverName;
+    private String driverPhone;
+    private Double driverRating; // Optional: if you want to show stars
+}
