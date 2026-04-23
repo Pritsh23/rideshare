@@ -13,6 +13,7 @@ import CreateRide from './pages/CreateRide';
 import MyBookings from './pages/MyBookings';
 import DriverRequestForm from "./components/DriverRequestForm";
 import RideList from "./pages/RideList";
+import MyRides from "./pages/MyRides"; // ✅ Step 1: Import your new file
 
 function App() {
   return (
@@ -62,6 +63,17 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+          {/* ✅ Step 2: Add this Route for your Offered Rides */}
+          <Route
+            path="/my-rides"
+            element={
+              <ProtectedRoute>
+                <MyRides />
+              </ProtectedRoute>
+            }
+          />
+
           <Route
             path="/driver-request"
             element={
@@ -71,10 +83,11 @@ function App() {
             }
           />
           <Route path="/view-rides" element={ <ProtectedRoute>
-      <RideList/>
-    </ProtectedRoute>
-  }
-/>
+              <RideList/>
+            </ProtectedRoute>
+          }
+          />
+          {/* Catch-all route */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>

@@ -9,7 +9,7 @@ export default function Navigation() {
   return (
     <nav className="bg-white shadow-md">
       <div className="px-4 py-3 flex justify-between items-center">
-        <Link to="/" className="text-2xl font-bold text-blue-600">🚗 Rideshare</Link>
+        <Link to="/" className="text-2xl font-bold text-blue-600">🚗 Ridemate</Link>
         
         {isAuthenticated ? (
           <div className="flex items-center gap-4">

@@ -80,16 +80,45 @@ export default function MyBookings() {
                     📅 {new Date(booking.ride.departureTime).toLocaleString()}
                   </p>
 
-                  <div className="space-y-2 border-t pt-4">
-                    <p className="text-gray-700 flex justify-between">
-                      <span className="font-semibold">Seats Booked:</span> 
-                      <span>{booking.seatsBooked}</span>
-                    </p>
-                    <p className="text-gray-700 flex justify-between">
-                      <span className="font-semibold">Total Price:</span> 
-                      <span className="text-green-600 font-bold">₹{booking.ride.pricePerSeat * booking.seatsBooked}</span>
-                    </p>
-                  </div>
+               {/* ... inside bookings.map ... */}
+
+<div className="space-y-2 border-t pt-4">
+  {/* 1. Driver Name */}
+  <div className="flex justify-between items-center text-sm">
+    <span className="font-semibold text-gray-600">Driver:</span>
+    <span className="text-gray-800 font-medium">
+      {booking.ride.driver?.name || "N/A"}
+    </span>
+  </div>
+
+  {/* 2. Driver Contact (Conditional) */}
+  <div className="flex justify-between items-center text-sm">
+    <span className="font-semibold text-gray-600">Contact:</span>
+    <span className="text-blue-600">
+      {/* 
+         Logic: Only show phone if the booking is accepted/confirmed.
+         Adjust 'ACCEPTED' to match your BookingStatus enum 
+      */}
+      {booking.status === 'ACCEPTED' || booking.status === 'CONFIRMED' 
+        ? booking.ride.driver?.phone 
+        : "Visible after confirmation"}
+    </span>
+  </div>
+
+  {/* Existing Seats Booked */}
+  <p className="text-gray-700 flex justify-between">
+    <span className="font-semibold">Seats Booked:</span> 
+    <span>{booking.seatsBooked}</span>
+  </p>
+
+  {/* Existing Price */}
+  <p className="text-gray-700 flex justify-between">
+    <span className="font-semibold">Total Price:</span> 
+    <span className="text-green-600 font-bold">₹{booking.ride.pricePerSeat * booking.seatsBooked}</span>
+  </p>
+</div>
+
+{/* ... rest of the component ... */}
                 </div>
 
                 <button

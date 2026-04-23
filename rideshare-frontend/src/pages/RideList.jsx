@@ -30,19 +30,29 @@ export default function RideList() {
     searchRides();
   }, []);
 
-  const searchRides = async () => {
+const searchRides = async () => {
     setLoading(true);
     try {
-      const currentDateTime = new Date().toISOString().split('.')[0];
+      const now = new Date();
+      // Using local time to ensure the backend gets the correct reference
+      const offset = now.getTimezoneOffset() * 60000;
+      const localISOTime = new Date(now - offset).toISOString().split('.')[0];
+      
       const res = await apiClient.get(`/rides/search`, {
         params: {
           source: search.source,
           destination: search.destination,
-          date: currentDateTime,
+          date: localISOTime,
           maxPrice: 10000
         }
       });
+
+      // console.log("Raw Response Data:", res.data);
+
+      // ✅ CHANGE: Remove the .filter() that is causing 0 results
+      // Just use the data directly from the backend
       setRides(res.data || []);
+      
     } catch (err) {
       console.error("Error searching rides:", err);
     } finally {
@@ -75,9 +85,9 @@ export default function RideList() {
     }
   };
 
-  // Helper to format the Date
-  const formatDateTime = (dateStr) => {
+ const formatDateTime = (dateStr) => {
     if (!dateStr) return "TBD";
+    // This will show the time in the user's local timezone
     return new Date(dateStr).toLocaleString('en-IN', {
       day: '2-digit',
       month: 'short',
@@ -91,7 +101,6 @@ export default function RideList() {
     <div className="max-w-4xl mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Find a Ride</h1>
 
-      {/* SEARCH UI */}
       <div className="bg-gray-100 p-4 rounded-lg flex flex-wrap gap-3 mb-6">
         <input
           placeholder="From"
@@ -108,7 +117,6 @@ export default function RideList() {
         <button onClick={searchRides} className="bg-blue-600 text-white px-6 py-2 rounded">Search</button>
       </div>
 
-      {/* PAYMENT SELECTOR */}
       <div className="mb-6 p-3 border-l-4 border-blue-500 bg-blue-50 flex items-center justify-between">
         <div>
           <label className="font-bold mr-2">Payment Method:</label>
@@ -127,7 +135,6 @@ export default function RideList() {
         </span>
       </div>
 
-      {/* RESULTS */}
       <h2 className="text-xl font-semibold mb-3">Available Rides</h2>
       {loading ? <p>Loading...</p> : (
         <div className="grid gap-4">
@@ -136,7 +143,6 @@ export default function RideList() {
               <div className="flex justify-between items-start border-b pb-3 mb-3">
                 <div>
                   <p className="text-lg font-bold text-gray-800">{ride.source} → {ride.destination}</p>
-                  {/* 📅 DEPARTURE TIME */}
                   <p className="text-sm font-medium text-blue-600">
                     🕒 {formatDateTime(ride.departureTime)}
                   </p>
@@ -147,35 +153,37 @@ export default function RideList() {
                 </div>
               </div>
 
-             {/* 👤 RIDER/DRIVER INFORMATION */}
+           {/* Updated Driver Section in RideList.jsx */}
 <div className="flex justify-between items-center">
   <div className="space-y-1">
     <div className="flex items-center gap-2">
-      {/* Updated line below: uses ride.driver.name */}
       <span className="text-sm font-semibold text-gray-700">
-        Driver: {ride.driver?.name || "Unknown Driver"}
+        {/* Use the specific DTO fields */}
+        Driver: {ride.driverName || "Unknown Driver"}
       </span>
       <span className="text-[10px] bg-green-100 text-green-700 px-1 rounded">
-        ⭐ {ride.driver?.rating || "5.0"}
+        ⭐ {ride.driverRating || "5.0"}
       </span>
     </div>
     
-    {/* Updated line below: uses ride.driver.phone */}
     <p className="text-xs text-gray-500">
-      📞 {ride.driver?.phone || "No Contact Shared"}
+      📞 {ride.driverPhone || "No Contact Shared"}
     </p>
   </div>
 
   <button
     onClick={() => bookRide(ride.id)}
-    // ... remaining button code ...
+    className={`px-4 py-2 rounded text-white font-bold transition ${
+      ride.availableSeats === 0 ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+    }`}
+    disabled={ride.availableSeats === 0}
   >
-    {bookingStatuses[ride.id] ? "Booked" : ride.availableSeats === 0 ? "Full" : "Book & Pay"}
+    {ride.availableSeats === 0 ? "Full" : "Book & Pay"}
   </button>
 </div>
             </div>
           ))}
-          {rides.length === 0 && <p className="text-center text-gray-500">No rides found for this route.</p>}
+          {rides.length === 0 && <p className="text-center text-gray-500">No upcoming rides found for this route.</p>}
         </div>
       )}
     </div>

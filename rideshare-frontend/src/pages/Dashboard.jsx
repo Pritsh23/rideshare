@@ -21,7 +21,7 @@ export default function Dashboard() {
       headers: { Authorization: `Bearer ${token}` }
     });
 
-    console.log("DATABASE RESPONSE:", res.data); // <--- ADD THIS LINE
+    // console.log("DATABASE RESPONSE:", res.data); // <--- ADD THIS LINE
     setUser(res.data);
     setLoading(false);
   } catch (err) {
