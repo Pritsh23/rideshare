@@ -5,7 +5,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -65,5 +69,24 @@ public List<Ride> getMyRides(Principal principal) {
 
     // Remove the "CREATED" filter to see all your rides
     return rideRepository.findByDriverId(driver.getId());
+}
+@DeleteMapping("/{rideId}")
+@Transactional
+public ResponseEntity<String> deleteRide(@PathVariable Long rideId, Principal principal) {
+    Ride ride = rideRepository.findById(rideId)
+            .orElseThrow(() -> new RuntimeException("Ride not found"));
+
+    // Security check: Only the driver who created the ride can delete it
+    if (!ride.getDriver().getEmail().equals(principal.getName())) {
+        return ResponseEntity.status(403).body("Not authorized to delete this ride");
+    }
+
+    // Optional: Business logic - Prevent deletion if people have already booked
+    if (ride.getBookedSeats() != null && ride.getBookedSeats() > 0) {
+        return ResponseEntity.badRequest().body("Cannot delete a ride that already has bookings. Please cancel them first.");
+    }
+
+    rideRepository.delete(ride);
+    return ResponseEntity.ok("Ride deleted successfully");
 }
 }

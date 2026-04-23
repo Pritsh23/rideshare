@@ -14,6 +14,7 @@ import MyBookings from './pages/MyBookings';
 import DriverRequestForm from "./components/DriverRequestForm";
 import RideList from "./pages/RideList";
 import MyRides from "./pages/MyRides"; // ✅ Step 1: Import your new file
+import DriverBookings from './pages/DriverBookings'; // or './components/DriverBookings' depending on where you saved it
 
 function App() {
   return (
@@ -87,6 +88,7 @@ function App() {
             </ProtectedRoute>
           }
           />
+          <Route path="/driver-bookings" element={<DriverBookings />} />
           {/* Catch-all route */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

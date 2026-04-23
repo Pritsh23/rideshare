@@ -22,6 +22,21 @@ export default function MyRides() {
       setLoading(false);
     }
   };
+  const handleDeleteRide = async (rideId) => {
+  if (!window.confirm("Are you sure you want to delete this ride? This action cannot be undone.")) return;
+
+  try {
+    const token = localStorage.getItem("token");
+    const res = await axios.delete(`http://localhost:8080/api/rides/${rideId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    alert(res.data);
+    fetchMyRides(); // Refresh the list after deletion
+  } catch (err) {
+    console.error("Delete failed:", err);
+    alert(err.response?.data || "Failed to delete ride.");
+  }
+};
 
   useEffect(() => {
     fetchMyRides();
@@ -107,6 +122,13 @@ export default function MyRides() {
                   <div className="text-right">
                     <p className="font-bold text-gray-700">Seats: {ride.bookedSeats || 0} / {ride.totalSeats}</p>
                     <p className="text-green-600 text-sm font-semibold">Available: {ride.availableSeats}</p>
+                    {/* --- INSERT THE DELETE BUTTON HERE --- */}
+  <button 
+    onClick={() => handleDeleteRide(ride.id)}
+    className="mt-3 text-xs bg-red-50 text-red-600 px-3 py-1.5 rounded-md border border-red-200 hover:bg-red-600 hover:text-white transition font-bold"
+  >
+    🗑️ Delete Ride
+  </button>
                   </div>
                 </div>
 
