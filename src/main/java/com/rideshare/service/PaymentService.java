@@ -3,11 +3,15 @@ package com.rideshare.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.rideshare.entity.Booking;
+import com.rideshare.entity.BookingStatus;
 import com.rideshare.entity.Payment;
 import com.rideshare.entity.PaymentMethod;
 import com.rideshare.entity.PaymentStatus;
 import com.rideshare.entity.Ride;
+import com.rideshare.entity.RideStatus;
 import com.rideshare.entity.User;
+import com.rideshare.repository.BookingRepository;
 import com.rideshare.repository.PaymentRepository;
 import com.rideshare.repository.RideRepository;
 import com.rideshare.repository.UserRepository;
@@ -21,42 +25,53 @@ public class PaymentService {
     private final PaymentRepository paymentRepo;
     private final RideRepository rideRepo;
     private final UserRepository userRepo;
+    private final BookingRepository bookingRepo;
 
     private static final double COMMISSION_RATE = 0.20; // 20%
 
-    @Transactional // ✅ Added to ensure wallet update and payment record save happen together
-    public Payment completePayment(Long rideId, PaymentMethod method) {
+    @Transactional
+    public Payment completePayment(Long bookingId, PaymentMethod method) {
 
-        Ride ride = rideRepo.findById(rideId)
-                .orElseThrow(() -> new RuntimeException("Ride not found"));
+        // ✅ Get booking
+        Booking booking = bookingRepo.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking not found"));
 
-        // Use price per seat (adjust this if you support multiple seats in one payment)
-        double fare = (ride.getPricePerSeat() == null) ? 0.0 : ride.getPricePerSeat();
+        // ✅ Only allow if ACCEPTED
+        if (booking.getStatus() != BookingStatus.ACCEPTED) {
+            throw new RuntimeException("Payment not allowed");
+        }
+
+        Ride ride = booking.getRide();
+        User driver = ride.getDriver();
+        User passenger = booking.getPassenger();
+
+        // ✅ Calculate fare (based on seats)
+        double pricePerSeat = (ride.getPricePerSeat() == null) ? 0.0 : ride.getPricePerSeat();
+        int seats = booking.getSeatsBooked();
+
+        double fare = pricePerSeat * seats;
         double commission = fare * COMMISSION_RATE;
         double driverAmount = fare - commission;
 
-        User driver = ride.getDriver();
-
-        // ⭐ FIX: Handle null wallet balance safely
+        // ✅ Wallet handling
         double currentBalance = (driver.getWalletBalance() == null) ? 0.0 : driver.getWalletBalance();
 
-        // ⭐ WALLET LOGIC
         if (method == PaymentMethod.COD) {
-            // Driver received full cash directly from passenger → Platform deducts commission from wallet
+            // Driver got cash → platform takes commission
             driver.setWalletBalance(currentBalance - commission);
         } else {
-            // Platform received money (ONLINE) → Platform adds driver's share to wallet
+            // Online → driver gets share
             driver.setWalletBalance(currentBalance + driverAmount);
         }
 
         userRepo.save(driver);
 
-        // Build the Payment record
-        // Note: Check if your Payment entity uses .builder() or new Payment()
+        // ✅ Create Payment
         Payment payment = Payment.builder()
+                .booking(booking)
                 .ride(ride)
                 .driver(driver)
-                .passenger(null) // Optional: ride.getPassenger() if your Ride entity has it
+                .passenger(passenger)
                 .amount(fare)
                 .commission(commission)
                 .driverAmount(driverAmount)
@@ -64,14 +79,23 @@ public class PaymentService {
                 .status(PaymentStatus.SUCCESS)
                 .build();
 
-        return paymentRepo.save(payment);
+        paymentRepo.save(payment);
+
+        // ✅ AUTO COMPLETE FLOW
+        booking.setStatus(BookingStatus.COMPLETED);
+        bookingRepo.save(booking);
+
+        ride.setStatus(RideStatus.COMPLETED);
+        rideRepo.save(ride);
+
+        return payment;
     }
 
+    // ✅ Wallet API
     public Double getDriverWallet(Long driverId) {
         User driver = userRepo.findById(driverId)
                 .orElseThrow(() -> new RuntimeException("Driver not found"));
 
-        // ✅ Return 0.0 if wallet is null so frontend doesn't crash
         return (driver.getWalletBalance() == null) ? 0.0 : driver.getWalletBalance();
     }
 }

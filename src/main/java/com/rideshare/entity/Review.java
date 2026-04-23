@@ -5,6 +5,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -34,4 +35,8 @@ public class Review {
 
     @ManyToOne
     private Ride ride;
+
+    @OneToOne
+    private Booking booking; // ✅ MUST be this name
+
 }

@@ -17,4 +17,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
     // ✅ Change this from deleteByBookingId to deleteByRideId
     void deleteByRideId(Long rideId); 
+
+    Optional<Payment> findByBookingId(Long bookingId);
+   
 }

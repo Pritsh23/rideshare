@@ -159,4 +159,27 @@ public ResponseEntity<Map<String, String>> getContact(
 
     return ResponseEntity.ok(response);
 }
+
+// Only driver can mark ride as completed, and only if it's currently accepted
+@PutMapping("/{bookingId}/complete")
+public Booking completeRide(@PathVariable Long bookingId,
+                            Principal principal) {
+
+    Booking booking = bookingRepository.findById(bookingId)
+            .orElseThrow(() -> new RuntimeException("Booking not found"));
+
+    // Only driver can complete ride
+    if (!booking.getRide().getDriver().getEmail().equals(principal.getName())) {
+        throw new RuntimeException("Not authorized");
+    }
+
+    // Only accepted rides can be completed
+    if (booking.getStatus() != BookingStatus.ACCEPTED) {
+        throw new RuntimeException("Ride not started or already finished");
+    }
+
+    booking.setStatus(BookingStatus.COMPLETED);
+
+    return bookingRepository.save(booking);
+}
 }
