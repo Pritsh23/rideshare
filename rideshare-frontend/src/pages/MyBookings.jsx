@@ -203,7 +203,7 @@ function ChatModal({ booking, onClose }) {
         </p>
         
         {/* Message Content */}
-        <p className="text-sm leading-relaxed break-words">
+        <p className="text-sm leading-relaxed break-words" style="color:blue">
           {m.content || m.message}
         </p>
       </div>
